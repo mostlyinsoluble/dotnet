@@ -6,7 +6,11 @@ using System.Reflection;
 namespace Microsoft.TestPlatform.AcceptanceTests;
 
 /// <summary>
-/// A data source that provides every version of runner.
+/// A data source that checks compatibility of changes in vstest.console with different versions of testhost. It also adds in-process mode and runner from VSIX.
+/// We are testing with all versions of testhost, because we want to make sure that even project with very old Microsoft.NET.Test.Sdk is able to be opened and used
+/// in Visual Studio.
+/// We test with VSIX and in-process to avoid duplicating tests only because they need runner from a different place.
+/// Use for testing changes specific to vstest.console. Or for interaction between runner and testhost.
 /// 
 /// When that adds up to no configuration exception is thrown.
 /// </summary>
@@ -14,23 +18,17 @@ public class RunnerCompatibilityDataSource : TestDataSourceAttribute<RunnerInfo>
 {
     private readonly CompatibilityRowsBuilder _builder;
 
-    public RunnerCompatibilityDataSource(
-        string runnerFrameworks = AcceptanceTestBase.DEFAULT_RUNNER_NETFX_AND_NET,
-        string runnerVersions = AcceptanceTestBase.LATEST_TO_LEGACY,
-        string hostFrameworks = AcceptanceTestBase.DEFAULT_HOST_NETFX_AND_NET)
+    public RunnerCompatibilityDataSource()
     {
-        // TODO: We actually don't generate values to use different translation layers, because we don't have a good way to do
-        // that right now. Translation layer is loaded directly into the acceptance test, and so we don't have easy way to substitute it.
-
         _builder = new CompatibilityRowsBuilder(
-            runnerFrameworks,
-            runnerVersions,
-            hostFrameworks,
-            // host versions
+            // runner
             AcceptanceTestBase.LATEST,
-            // adapter versions
+            AcceptanceTestBase.DEFAULT_RUNNER_NETFX_AND_NET,
+            // host
+            AcceptanceTestBase.LATEST_TO_LEGACY,
+            AcceptanceTestBase.DEFAULT_HOST_NETFX_AND_NET,
+            // adapter
             AcceptanceTestBase.LATESTSTABLE,
-            // adapters
             AcceptanceTestBase.MSTEST);
 
         // Do not generate the data rows here, properties (e.g. DebugVSTestConsole) are not populated until after constructor is done.
@@ -41,11 +39,6 @@ public class RunnerCompatibilityDataSource : TestDataSourceAttribute<RunnerInfo>
     public bool DebugDataCollector { get; set; }
     public bool DebugStopAtEntrypoint { get; set; }
     public int JustRow { get; set; } = -1;
-
-    /// <summary>
-    /// Add run for in-process using the selected .NET Framework runners, and and all selected adapters.
-    /// </summary>
-    public bool InProcess { get; set; }
 
     public string? BeforeFeature { get; set; }
     public string? AfterFeature { get; set; }
@@ -58,12 +51,8 @@ public class RunnerCompatibilityDataSource : TestDataSourceAttribute<RunnerInfo>
 
     public override void CreateData(MethodInfo methodInfo)
     {
-        _builder.WithEveryVersionOfRunner = true;
         _builder.WithVSIXRunner = true;
-        _builder.WithEveryVersionOfHost = false;
-        _builder.WithEveryVersionOfAdapter = false;
-        _builder.WithOlderConfigurations = false;
-        _builder.WithInProcess = InProcess;
+        _builder.WithInProcess = true;
 
         _builder.BeforeRunnerFeature = BeforeFeature;
         _builder.AfterRunnerFeature = AfterFeature;
@@ -85,4 +74,3 @@ public class RunnerCompatibilityDataSource : TestDataSourceAttribute<RunnerInfo>
         data.ForEach(AddData);
     }
 }
-
