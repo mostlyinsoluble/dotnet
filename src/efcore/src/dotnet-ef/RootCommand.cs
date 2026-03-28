@@ -106,6 +106,13 @@ internal class RootCommand : CommandBase
             startupProject.AssemblyName + ".runtimeconfig.json");
         var projectAssetsFile = startupProject.ProjectAssetsFile;
 
+        if (!string.IsNullOrEmpty(startupProject.TargetPlatformIdentifier)
+            || HasPlatformInTargetFramework(startupProject.TargetFramework))
+        {
+            Reporter.WriteWarning(
+                Resources.PlatformSpecificProject(startupProject.ProjectName, startupProject.TargetFramework));
+        }
+
         var targetFramework = new FrameworkName(startupProject.TargetFrameworkMoniker!);
         if (targetFramework.Identifier == ".NETFramework")
         {
@@ -150,11 +157,7 @@ internal class RootCommand : CommandBase
                 args.Add(startupProject.RuntimeFrameworkVersion);
             }
 
-#if !NET10_0
-#error Target framework needs to be updated here, as well as in Microsoft.EntityFrameworkCore.Tasks.props and EntityFrameworkCore.psm1
-#endif
-            // TODO: Remove TFM from the path, issue #37473
-            args.Add(Path.Combine(toolsPath, "net10.0", "any", "ef.dll"));
+            args.Add(Path.Combine(toolsPath, "net", "ef.dll"));
         }
         else if (targetFramework.Identifier == ".NETStandard")
         {
@@ -312,6 +315,18 @@ internal class RootCommand : CommandBase
     private static string GetVersion()
         => typeof(RootCommand).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
             .InformationalVersion;
+
+    private static bool HasPlatformInTargetFramework(string? targetFramework)
+    {
+        if (string.IsNullOrEmpty(targetFramework))
+        {
+            return false;
+        }
+
+        // Check for netX.Y-Z form (e.g. net8.0-windows10.0.19041.0)
+        var dashIndex = targetFramework.IndexOf('-');
+        return dashIndex > 0 && dashIndex < targetFramework.Length - 1;
+    }
 
     private static bool ShouldHelp(IReadOnlyList<string> commands, IList<string> args)
         => args.Count == 0
