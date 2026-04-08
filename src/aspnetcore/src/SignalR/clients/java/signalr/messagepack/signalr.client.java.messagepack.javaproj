@@ -12,7 +12,6 @@
   <ItemGroup>
     <Jars Include="
         signalr-messagepack-$(PackageVersion).jar;
-        signalr-messagepack-$(PackageVersion)-javadoc.jar;
         signalr-messagepack-$(PackageVersion)-sources.jar;" />
     <PomFile Include="signalr-messagepack-$(PackageVersion).pom" />
     <JavaBuildFiles Include="@(Jars);@(PomFile)"/>

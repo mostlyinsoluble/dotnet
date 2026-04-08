@@ -51,8 +51,6 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 "/ExtractedPackage/Microsoft.Android.Sdk.Darwin.nuspec",
                 "/ExtractedPackage/LICENSE",
                 "/ExtractedPackage/PreserveLists/Java.Interop.xml",
-                "/ExtractedPackage/tools/javadoc-to-mdoc.dll",
-                "/ExtractedPackage/tools/javadoc-to-mdoc.runtimeconfig.json",
                 "/ExtractedPackage/tools/Darwin/mono",
             };
             var result = installer.FindAllFilesNeedExecutablePermission(allFiles, "/ExtractedPackage");
@@ -73,8 +71,6 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 "/ExtractedPackage/Not.In.Allow.List.nuspec",
                 "/ExtractedPackage/LICENSE",
                 "/ExtractedPackage/PreserveLists/Java.Interop.xml",
-                "/ExtractedPackage/tools/javadoc-to-mdoc.dll",
-                "/ExtractedPackage/tools/javadoc-to-mdoc.runtimeconfig.json",
                 "/ExtractedPackage/tools/Darwin/mono",
             };
             var result = installer.FindAllFilesNeedExecutablePermission(allFiles, "/ExtractedPackage");
